@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 interface MedicalRecord {
   id: string;
@@ -27,7 +27,8 @@ const mockRecords: MedicalRecord[] = [
   },
 ];
 
-export default function Prontuario({ params }: { params: { id: string } }) {
+export default function Prontuario({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = React.use(params);
   const [records, setRecords] = useState<MedicalRecord[]>(mockRecords);
   const [activeTab, setActiveTab] = useState<'records' | 'info' | 'appointments'>('records');
 
