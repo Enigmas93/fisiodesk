@@ -142,7 +142,18 @@ export function Onboarding() {
       toast.success('Onboarding concluído com sucesso!')
       navigate('/dashboard')
     } catch (error: any) {
-      toast.error(error.message || 'Não foi possível concluir o onboarding.')
+      const message = String(error?.message || '')
+
+      if (
+        message.includes('row-level security policy') &&
+        message.includes('"clinics"')
+      ) {
+        toast.error(
+          'O banco ainda não liberou a criação da clínica no onboarding. Aplique a migration 003_auth_bootstrap_policies.sql no Supabase e tente novamente.'
+        )
+      } else {
+        toast.error(error.message || 'Não foi possível concluir o onboarding.')
+      }
     } finally {
       setIsSubmitting(false)
     }
