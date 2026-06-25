@@ -70,8 +70,15 @@ function App() {
   const isLoading = useAuthStore((state) => state.isLoading)
 
   useEffect(() => {
+    // #region debug-point B:check-session-effect
+    fetch('http://127.0.0.1:7777/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: 'root-auto-login', runId: 'pre-fix', hypothesisId: 'B', location: 'src/App.tsx:72', msg: '[DEBUG] App checkSession effect', data: { href: window.location.href, pathname: window.location.pathname }, ts: Date.now() }) }).catch(() => {})
+    // #endregion
     checkSession()
   }, [checkSession])
+
+  // #region debug-point B:app-render
+  fetch('http://127.0.0.1:7777/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: 'root-auto-login', runId: 'pre-fix', hypothesisId: 'B', location: 'src/App.tsx:App', msg: '[DEBUG] App render', data: { isLoading, href: window.location.href, pathname: window.location.pathname }, ts: Date.now() }) }).catch(() => {})
+  // #endregion
 
   if (isLoading) {
     return (
@@ -172,13 +179,9 @@ function App() {
             }
           />
         </Route>
-        <Route
-          path="/*"
-          element={<ProtectedLayoutRoute />}
-        >
-          <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route element={<ProtectedLayoutRoute />}>
           <Route
-            path="dashboard"
+            path="/dashboard"
             element={
               <Suspense fallback={<RouteFallback />}>
                 <Dashboard />
@@ -186,7 +189,7 @@ function App() {
             }
           />
           <Route
-            path="agenda"
+            path="/agenda"
             element={
               <Suspense fallback={<RouteFallback />}>
                 <Agenda />
@@ -194,7 +197,7 @@ function App() {
             }
           />
           <Route
-            path="agenda/:date"
+            path="/agenda/:date"
             element={
               <Suspense fallback={<RouteFallback />}>
                 <Agenda />
@@ -202,7 +205,7 @@ function App() {
             }
           />
           <Route 
-            path="agenda/novo" 
+            path="/agenda/novo" 
             element={
               <Suspense fallback={<RouteFallback />}>
                 <AgendamentoForm />
@@ -210,7 +213,7 @@ function App() {
             } 
           />
           <Route 
-            path="agenda/:id/editar" 
+            path="/agenda/:id/editar" 
             element={
               <Suspense fallback={<RouteFallback />}>
                 <AgendamentoForm />
@@ -218,7 +221,7 @@ function App() {
             } 
           />
           <Route
-            path="pacientes"
+            path="/pacientes"
             element={
               <Suspense fallback={<RouteFallback />}>
                 <Pacientes />
@@ -226,7 +229,7 @@ function App() {
             }
           />
           <Route 
-            path="pacientes/novo" 
+            path="/pacientes/novo" 
             element={
               <Suspense fallback={<RouteFallback />}>
                 <PacienteForm />
@@ -234,7 +237,7 @@ function App() {
             } 
           />
           <Route 
-            path="pacientes/:id" 
+            path="/pacientes/:id" 
             element={
               <Suspense fallback={<RouteFallback />}>
                 <PacienteDetail />
@@ -242,7 +245,7 @@ function App() {
             } 
           />
           <Route 
-            path="pacientes/:id/editar" 
+            path="/pacientes/:id/editar" 
             element={
               <Suspense fallback={<RouteFallback />}>
                 <PacienteForm />
@@ -250,7 +253,7 @@ function App() {
             } 
           />
           <Route
-            path="prontuarios"
+            path="/prontuarios"
             element={
               <Suspense fallback={<RouteFallback />}>
                 <Prontuarios />
@@ -258,7 +261,7 @@ function App() {
             }
           />
           <Route
-            path="financeiro"
+            path="/financeiro"
             element={
               <Suspense fallback={<RouteFallback />}>
                 <Financeiro />
@@ -266,7 +269,7 @@ function App() {
             }
           />
           <Route
-            path="relatorios"
+            path="/relatorios"
             element={
               <Suspense fallback={<RouteFallback />}>
                 <Relatorios />
@@ -274,7 +277,7 @@ function App() {
             }
           />
           <Route
-            path="configuracoes"
+            path="/configuracoes"
             element={
               <Suspense fallback={<RouteFallback />}>
                 <Configuracoes />

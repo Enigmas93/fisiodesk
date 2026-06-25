@@ -129,6 +129,10 @@ export function LandingPage() {
 
   const supportLink = useMemo(() => getSupportWhatsappLink(), [])
 
+  // #region debug-point C:landing-render
+  fetch('http://127.0.0.1:7777/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: 'root-auto-login', runId: 'pre-fix', hypothesisId: 'C', location: 'src/pages/public/LandingPage.tsx:LandingPage', msg: '[DEBUG] LandingPage render', data: { href: window.location.href, pathname: window.location.pathname }, ts: Date.now() }) }).catch(() => {})
+  // #endregion
+
   return (
     <div className="min-h-screen bg-white text-neutral-900">
       <header className="sticky top-0 z-50 border-b border-white/50 bg-white/90 backdrop-blur-md">
