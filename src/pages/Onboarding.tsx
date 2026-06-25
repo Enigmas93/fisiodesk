@@ -56,15 +56,106 @@ export function Onboarding() {
   })
 
   useEffect(() => {
-    if (tenantContext?.clinicId) {
+    if (tenantContext?.clinicId && !isConnectingGoogle) {
       navigate('/dashboard', { replace: true })
     }
-  }, [tenantContext, navigate])
+  }, [tenantContext, isConnectingGoogle, navigate])
 
   const progress = useMemo(() => (step / TOTAL_STEPS) * 100, [step])
 
   const nextStep = () => setStep((prev) => Math.min(prev + 1, TOTAL_STEPS))
   const previousStep = () => setStep((prev) => Math.max(prev - 1, 1))
+
+  const createInitialStructure = async () => {
+    if (!user) {
+      throw new Error('Usuário não autenticado.')
+    }
+
+    if (!data.clinicName || !data.professionalName) {
+      throw new Error('Preencha os dados obrigatórios para concluir o onboarding.')
+    }
+
+    if (tenantContext?.clinicId) {
+      return tenantContext
+    }
+
+    const { data: existingProfessional, error: existingProfessionalError } = await (supabase.from('professionals') as any)
+      .select('id, clinic_id, name, role')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (existingProfessionalError) {
+      throw existingProfessionalError
+    }
+
+    if (existingProfessional?.clinic_id) {
+      await queryClient.invalidateQueries({ queryKey: ['tenant-context'] })
+      return existingProfessional
+    }
+
+    const { data: clinic, error: clinicError } = await (supabase.from('clinics') as any)
+      .insert({
+        name: data.clinicName,
+        phone: data.clinicPhone || null,
+        address: data.clinicAddress || null,
+        logo_url: data.clinicLogoUrl || null
+      })
+      .select()
+      .single()
+
+    if (clinicError) {
+      throw clinicError
+    }
+
+    const { data: professional, error: professionalError } = await (supabase.from('professionals') as any)
+      .insert({
+        clinic_id: clinic.id,
+        user_id: user.id,
+        name: data.professionalName,
+        email: user.email,
+        crefito: data.crefito || null,
+        specialty: data.specialty || null,
+        color: data.professionalColor
+      })
+      .select('id, clinic_id, name, role')
+      .single()
+
+    if (professionalError) {
+      throw professionalError
+    }
+
+    if (data.createRoom && data.roomName) {
+      const { error: roomError } = await (supabase.from('rooms') as any).insert({
+        clinic_id: clinic.id,
+        name: data.roomName,
+        description: data.roomDescription || null
+      })
+
+      if (roomError) {
+        throw roomError
+      }
+    }
+
+    if (data.createProcedure && data.procedureName) {
+      const { error: procedureError } = await (supabase.from('procedures') as any).insert({
+        clinic_id: clinic.id,
+        name: data.procedureName,
+        duration_min: data.procedureDuration,
+        price: data.procedurePrice
+      })
+
+      if (procedureError) {
+        throw procedureError
+      }
+    }
+
+    await queryClient.invalidateQueries({ queryKey: ['tenant-context'] })
+    await queryClient.invalidateQueries({ queryKey: ['professionals'] })
+    await queryClient.invalidateQueries({ queryKey: ['rooms'] })
+    await queryClient.invalidateQueries({ queryKey: ['procedures'] })
+
+    return professional
+  }
 
   const finishOnboarding = async () => {
     if (!user) {
@@ -80,65 +171,7 @@ export function Onboarding() {
     setIsSubmitting(true)
 
     try {
-      const { data: clinic, error: clinicError } = await (supabase.from('clinics') as any)
-        .insert({
-          name: data.clinicName,
-          phone: data.clinicPhone || null,
-          address: data.clinicAddress || null,
-          logo_url: data.clinicLogoUrl || null
-        })
-        .select()
-        .single()
-
-      if (clinicError) {
-        throw clinicError
-      }
-
-      const { error: professionalError } = await (supabase.from('professionals') as any)
-        .insert({
-          clinic_id: clinic.id,
-          user_id: user.id,
-          name: data.professionalName,
-          email: user.email,
-          crefito: data.crefito || null,
-          specialty: data.specialty || null,
-          color: data.professionalColor
-        })
-
-      if (professionalError) {
-        throw professionalError
-      }
-
-      if (data.createRoom && data.roomName) {
-        const { error: roomError } = await (supabase.from('rooms') as any).insert({
-          clinic_id: clinic.id,
-          name: data.roomName,
-          description: data.roomDescription || null
-        })
-
-        if (roomError) {
-          throw roomError
-        }
-      }
-
-      if (data.createProcedure && data.procedureName) {
-        const { error: procedureError } = await (supabase.from('procedures') as any).insert({
-          clinic_id: clinic.id,
-          name: data.procedureName,
-          duration_min: data.procedureDuration,
-          price: data.procedurePrice
-        })
-
-        if (procedureError) {
-          throw procedureError
-        }
-      }
-
-      await queryClient.invalidateQueries({ queryKey: ['tenant-context'] })
-      await queryClient.invalidateQueries({ queryKey: ['professionals'] })
-      await queryClient.invalidateQueries({ queryKey: ['rooms'] })
-      await queryClient.invalidateQueries({ queryKey: ['procedures'] })
-
+      await createInitialStructure()
       toast.success('Onboarding concluído com sucesso!')
       navigate('/dashboard')
     } catch (error: any) {
@@ -159,9 +192,28 @@ export function Onboarding() {
     }
   }
 
-  const connectGoogle = () => {
+  const connectGoogle = async () => {
     setIsConnectingGoogle(true)
-    initiateGoogleOAuth()
+
+    try {
+      await createInitialStructure()
+      initiateGoogleOAuth()
+    } catch (error: any) {
+      const message = String(error?.message || '')
+
+      if (
+        message.includes('row-level security policy') &&
+        message.includes('"clinics"')
+      ) {
+        toast.error(
+          'O banco ainda não liberou a criação da clínica no onboarding. Aplique a migration 003_auth_bootstrap_policies.sql no Supabase e tente novamente.'
+        )
+      } else {
+        toast.error(error.message || 'Não foi possível preparar a integração com o Google.')
+      }
+
+      setIsConnectingGoogle(false)
+    }
   }
 
   if (isLoadingTenant) {
