@@ -1,12 +1,17 @@
-import { FileText, Calendar, User } from 'lucide-react';
+import { FileText, Calendar, User } from 'lucide-react'
+import { toast } from 'sonner'
 
 const prontuarios = [
   { id: 1, paciente: 'Maria Silva', data: '15/06/2025', tipo: 'Avaliação Inicial', profissional: 'Dr. João' },
   { id: 2, paciente: 'Maria Silva', data: '18/06/2025', tipo: 'Evolução', profissional: 'Dr. João' },
   { id: 3, paciente: 'João Pereira', data: '20/06/2025', tipo: 'Reavaliação', profissional: 'Dra. Maria' },
-];
+]
 
 export function Prontuarios() {
+  const handleVerDetalhes = (prontuario: any) => {
+    toast.info(`Prontuário de ${prontuario.paciente} em desenvolvimento`)
+  }
+
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl border border-neutral-200 shadow-sm">
@@ -39,7 +44,10 @@ export function Prontuarios() {
                   </div>
                 </div>
               </div>
-              <button className="text-primary hover:underline text-sm font-medium">
+              <button 
+                onClick={() => handleVerDetalhes(prontuario)}
+                className="text-primary hover:underline text-sm font-medium"
+              >
                 Ver detalhes
               </button>
             </div>
@@ -47,5 +55,5 @@ export function Prontuarios() {
         </div>
       </div>
     </div>
-  );
+  )
 }

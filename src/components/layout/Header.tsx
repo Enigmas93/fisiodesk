@@ -23,6 +23,7 @@ const breadcrumbNames: Record<string, string> = {
 export function Header() {
   const location = useLocation()
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
   const { user, logout } = useAuthStore()
 
   const getCurrentPage = () => {
@@ -69,10 +70,30 @@ export function Header() {
           <Plus className="w-4 h-4" />
         </Link>
 
-        <button className="relative p-2 text-neutral-600 hover:bg-neutral-100 rounded-md transition-colors">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full" />
-        </button>
+        <div className="relative">
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="relative p-2 text-neutral-600 hover:bg-neutral-100 rounded-md transition-colors"
+          >
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full" />
+          </button>
+
+          {showNotifications && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setShowNotifications(false)}
+              />
+              <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-neutral-200 rounded-md shadow-lg z-50 p-4">
+                <h3 className="font-semibold text-neutral-800 mb-3">Notificações</h3>
+                <div className="text-sm text-neutral-500 text-center py-4">
+                  Nenhuma notificação no momento
+                </div>
+              </div>
+            </>
+          )}
+        </div>
 
         <div className="relative">
           <button
