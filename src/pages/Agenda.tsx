@@ -6,9 +6,27 @@ import ptBrLocale from '@fullcalendar/core/locales/pt-br'
 import { useAppointments } from '../hooks/useAppointments'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useState } from 'react'
 
 export function Agenda() {
   const { data: appointments, isLoading, error } = useAppointments()
+  
+  // Carregar configurações da agenda do localStorage
+  const [agendaSettings] = useState(() => {
+    const saved = localStorage.getItem('agendaSettings');
+    return saved ? JSON.parse(saved) : {
+      startTime: '08:00',
+      endTime: '18:00',
+      slotDuration: 15
+    };
+  })
+  
+  // Formatar slotDuration para FullCalendar (ex: 15 -> '00:15:00')
+  const formatSlotDuration = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00`;
+  };
 
   const handleDateClick = (info: any) => {
     toast.info(`Data selecionada: ${info.dateStr}`)
@@ -76,8 +94,9 @@ export function Agenda() {
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay',
           }}
-          slotMinTime="07:00:00"
-          slotMaxTime="21:00:00"
+          slotMinTime={`${agendaSettings.startTime}:00`}
+          slotMaxTime={`${agendaSettings.endTime}:00`}
+          slotDuration={formatSlotDuration(agendaSettings.slotDuration)}
           events={events}
           height="100%"
           dateClick={handleDateClick}

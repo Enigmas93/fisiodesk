@@ -13,6 +13,16 @@ const tabs = [
 export function Configuracoes() {
   const [activeTab, setActiveTab] = useState('clinica');
   
+  // Estado para configurações da agenda (carregado do localStorage)
+  const [agendaSettings, setAgendaSettings] = useState(() => {
+    const saved = localStorage.getItem('agendaSettings');
+    return saved ? JSON.parse(saved) : {
+      startTime: '08:00',
+      endTime: '18:00',
+      slotDuration: 15
+    };
+  });
+  
   // Estado para Profissionais
   const [profissionais, setProfissionais] = useState([
     { id: 1, nome: 'Dr. João Silva', especialidade: 'Fisioterapia', email: 'joao@fisiodesk.com' },
@@ -42,6 +52,12 @@ export function Configuracoes() {
 
   const handleSave = (section: string) => {
     toast.success(`${section} salva com sucesso!`);
+  };
+  
+  // Função para salvar configurações da agenda
+  const handleSaveAgenda = () => {
+    localStorage.setItem('agendaSettings', JSON.stringify(agendaSettings));
+    toast.success('Configurações da agenda salvas com sucesso!');
   };
 
   // Funções para Profissionais
@@ -658,7 +674,8 @@ export function Configuracoes() {
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Horário de Início</label>
                   <input
                     type="time"
-                    defaultValue="08:00"
+                    value={agendaSettings.startTime}
+                    onChange={(e) => setAgendaSettings({...agendaSettings, startTime: e.target.value})}
                     className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                   />
                 </div>
@@ -666,7 +683,8 @@ export function Configuracoes() {
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Horário de Término</label>
                   <input
                     type="time"
-                    defaultValue="18:00"
+                    value={agendaSettings.endTime}
+                    onChange={(e) => setAgendaSettings({...agendaSettings, endTime: e.target.value})}
                     className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                   />
                 </div>
@@ -674,12 +692,13 @@ export function Configuracoes() {
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Intervalo padrão (minutos)</label>
                   <input
                     type="number"
-                    defaultValue="15"
+                    value={agendaSettings.slotDuration}
+                    onChange={(e) => setAgendaSettings({...agendaSettings, slotDuration: parseInt(e.target.value) || 15})}
                     className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                   />
                 </div>
                 <button 
-                  onClick={() => handleSave('Agenda')}
+                  onClick={handleSaveAgenda}
                   className="bg-primary hover:bg-primary-dark text-white font-medium px-6 py-3 rounded-lg transition-colors"
                 >
                   Salvar Alterações
