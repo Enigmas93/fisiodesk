@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+      },
       colors: {
         primary: '#0EA5E9',
         'primary-dark': '#0284C7',
@@ -18,6 +21,11 @@ export default {
         'neutral-800': '#1E293B',
         'neutral-900': '#0F172A',
       },
+      borderRadius: {
+        lg: '8px',
+        md: '6px',
+        xl: '20px',
+      }
     },
   },
   plugins: [],

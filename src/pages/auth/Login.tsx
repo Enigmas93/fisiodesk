@@ -1,42 +1,29 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
-import { useAuthStore } from '../../stores/authStore';
-import { LayoutDashboard } from 'lucide-react';
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../../stores/authStore'
+import { LayoutDashboard, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 export function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const setUser = useAuthStore((state) => state.setUser);
-  const navigate = useNavigate();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const login = useAuthStore((state: any) => state.login)
+  const navigate = useNavigate()
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
+    e.preventDefault()
+    setIsLoading(true)
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      if (data.user) {
-        setUser({
-          id: data.user.id,
-          email: data.user.email!,
-          name: data.user.user_metadata?.name || data.user.email!,
-        });
-        navigate('/dashboard');
-      }
+      await login(email, password)
+      toast.success('Login realizado com sucesso!')
+      navigate('/dashboard')
     } catch (error: any) {
-      alert(error.message);
+      toast.error(error.message || 'Erro ao fazer login')
     } finally {
-      setLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary to-accent p-4">
@@ -50,8 +37,12 @@ export function Login() {
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-center text-neutral-800 mb-2">Bem-vindo de volta</h1>
-        <p className="text-neutral-500 text-center mb-8">Faça login na sua conta</p>
+        <h1 className="text-2xl font-bold text-center text-neutral-800 mb-2">
+          Bem-vindo de volta
+        </h1>
+        <p className="text-neutral-500 text-center mb-8">
+          Faça login na sua conta
+        </p>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
@@ -63,7 +54,7 @@ export function Login() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+              className="w-full px-4 py-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
               placeholder="seu@email.com"
               required
             />
@@ -78,7 +69,7 @@ export function Login() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+              className="w-full px-4 py-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
               placeholder="••••••••"
               required
             />
@@ -86,10 +77,17 @@ export function Login() {
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-50"
+            disabled={isLoading}
+            className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 rounded-md transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading ? 'Entrando...' : 'Entrar'}
+            {isLoading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Entrando...
+              </>
+            ) : (
+              'Entrar'
+            )}
           </button>
         </form>
 
@@ -101,5 +99,5 @@ export function Login() {
         </p>
       </div>
     </div>
-  );
+  )
 }
