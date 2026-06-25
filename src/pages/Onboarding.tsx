@@ -108,8 +108,11 @@ export function Onboarding() {
       throw clinicError
     }
 
-    const { data: professional, error: professionalError } = await (supabase.from('professionals') as any)
+    const professionalId = crypto.randomUUID()
+
+    const { error: professionalError } = await (supabase.from('professionals') as any)
       .insert({
+        id: professionalId,
         clinic_id: clinicId,
         user_id: user.id,
         name: data.professionalName,
@@ -118,8 +121,6 @@ export function Onboarding() {
         specialty: data.specialty || null,
         color: data.professionalColor
       })
-      .select('id, clinic_id, name, role')
-      .single()
 
     if (professionalError) {
       throw professionalError
@@ -155,7 +156,12 @@ export function Onboarding() {
     await queryClient.invalidateQueries({ queryKey: ['rooms'] })
     await queryClient.invalidateQueries({ queryKey: ['procedures'] })
 
-    return professional
+    return {
+      id: professionalId,
+      clinic_id: clinicId,
+      name: data.professionalName,
+      role: 'admin'
+    }
   }
 
   const finishOnboarding = async () => {
