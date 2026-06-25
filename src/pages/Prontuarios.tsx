@@ -1,4 +1,4 @@
-import { FileText, Calendar, User } from 'lucide-react'
+import { FileText, Calendar, User, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
 const prontuarios = [
@@ -9,14 +9,23 @@ const prontuarios = [
 
 export function Prontuarios() {
   const handleVerDetalhes = (prontuario: any) => {
-    toast.info(`Prontuário de ${prontuario.paciente} em desenvolvimento`)
+    toast.info(`Abrindo prontuário de ${prontuario.paciente}`)
   }
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-neutral-800">Prontuários Recentes</h3>
+        <button 
+          onClick={() => toast.info('Adicionar novo prontuário em desenvolvimento')}
+          className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Novo Prontuário
+        </button>
+      </div>
       <div className="bg-white rounded-xl border border-neutral-200 shadow-sm">
         <div className="p-6 border-b border-neutral-200">
-          <h3 className="text-lg font-semibold text-neutral-800">Prontuários Recentes</h3>
         </div>
         <div className="divide-y divide-neutral-200">
           {prontuarios.map((prontuario) => (
