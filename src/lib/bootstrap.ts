@@ -39,6 +39,8 @@ async function getProPlanId() {
   return data?.id as string | undefined
 }
 
+const TRIAL_DAYS = 14
+
 export async function ensureClinicBootstrap(options: BootstrapOptions) {
   const {
     user,
@@ -122,14 +124,23 @@ export async function ensureClinicBootstrap(options: BootstrapOptions) {
 
   if (!existingSubscription?.id) {
     const planId = await getProPlanId()
+    const now = new Date()
+    const trialEnd = new Date(now)
+    trialEnd.setDate(trialEnd.getDate() + TRIAL_DAYS)
+
     const { error: subscriptionError } = await (supabase.from('subscriptions') as any).insert({
       clinic_id: clinicId,
       plan_id: planId || null,
-      status: 'pending',
-      payment_method: 'manual',
+      status: 'trial',
+      activated_at: now.toISOString(),
+      current_period_start: now.toISOString(),
+      current_period_end: trialEnd.toISOString(),
+      next_billing_date: trialEnd.toISOString().slice(0, 10),
+      payment_method: 'trial',
       contact_whatsapp: clinicPhone || null,
       metadata: {
-        source: 'bootstrap'
+        source: 'bootstrap',
+        trial_days: TRIAL_DAYS
       }
     })
 

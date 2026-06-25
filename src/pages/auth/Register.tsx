@@ -57,7 +57,7 @@ export function Register() {
       })
 
       await useAuthStore.getState().checkSession()
-      toast.success('Conta criada com sucesso! Seu acesso foi enviado para ativação.')
+      toast.success('Conta criada com sucesso! Seu teste gratuito de 14 dias ja esta liberado.')
       navigate('/dashboard')
     } catch (error: any) {
       toast.error(error.message || 'Não foi possível criar sua conta.')
@@ -82,7 +82,7 @@ export function Register() {
           Criar conta
         </h1>
         <p className="text-neutral-500 text-center mb-8">
-          Cadastre sua clínica e entre na fila de ativação do Plano Pro
+          Cadastre sua clinica e comece agora com 14 dias gratis no Plano Pro
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -197,6 +197,9 @@ export function Register() {
           <Link to="/login" className="text-primary font-medium hover:underline">
             Entrar
           </Link>
+        </p>
+        <p className="mt-3 text-center text-xs text-neutral-500">
+          Sem cartao de credito. Apos 14 dias, voce escolhe se deseja continuar com o plano.
         </p>
       </div>
     </div>

@@ -28,6 +28,30 @@ type ProfessionalWithClinic = Professional & {
   clinic?: Clinic | null
 }
 
+const hasValidPeriod = (value: string | null | undefined) => {
+  if (!value) return true
+
+  const timestamp = new Date(value).getTime()
+  if (Number.isNaN(timestamp)) return false
+
+  return timestamp > Date.now()
+}
+
+const isSubscriptionAccessible = (subscription: Subscription | null, isSuperAdmin: boolean) => {
+  if (isSuperAdmin) return true
+  if (!subscription) return false
+
+  if (subscription.status === 'trial') {
+    return hasValidPeriod(subscription.current_period_end)
+  }
+
+  if (subscription.status === 'active') {
+    return hasValidPeriod(subscription.current_period_end)
+  }
+
+  return false
+}
+
 const getDefaultState = () => ({
   user: null,
   professional: null,
@@ -95,10 +119,7 @@ const loadSessionState = async (authUser: {
   }
 
   const hasTenant = Boolean(professional?.clinic_id)
-  const hasActiveSubscription =
-    isSuperAdmin ||
-    subscription?.status === 'active' ||
-    subscription?.status === 'trial'
+  const hasActiveSubscription = isSubscriptionAccessible(subscription, isSuperAdmin)
 
   return {
     user,
@@ -224,10 +245,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     const subscription = (data as Subscription | null) ?? null
     set({
       subscription,
-      hasActiveSubscription:
-        isSuperAdmin ||
-        subscription?.status === 'active' ||
-        subscription?.status === 'trial'
+      hasActiveSubscription: isSubscriptionAccessible(subscription, isSuperAdmin)
     })
   }
 }))

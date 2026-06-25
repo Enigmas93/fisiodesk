@@ -85,7 +85,7 @@ export default function AdminClientesPage() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Clientes e assinaturas</h1>
-          <p className="mt-1 text-slate-500">Gerencie ativações, suspensões e cancelamentos dos clientes do SaaS.</p>
+          <p className="mt-1 text-slate-500">Acompanhe trials, ativacoes, suspensoes e cancelamentos dos clientes do SaaS.</p>
         </div>
 
         <select
@@ -94,11 +94,11 @@ export default function AdminClientesPage() {
           className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700"
         >
           <option value="all">Todos os status</option>
-          <option value="pending">Pending</option>
-          <option value="active">Active</option>
-          <option value="suspended">Suspended</option>
-          <option value="cancelled">Cancelled</option>
-          <option value="expired">Expired</option>
+          <option value="pending">Pendente</option>
+          <option value="active">Ativo</option>
+          <option value="suspended">Suspenso</option>
+          <option value="cancelled">Cancelado</option>
+          <option value="expired">Expirado</option>
           <option value="trial">Trial</option>
         </select>
       </div>

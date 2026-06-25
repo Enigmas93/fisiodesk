@@ -20,7 +20,7 @@ import {
 import { appEnv, getSupportWhatsappLink } from '../../lib/env'
 
 const WHATSAPP_PLAN_LINK = getSupportWhatsappLink(
-  'Olá! Quero assinar o FisioDesk Plano Pro (R$59,90/mês). Como faço o pagamento?'
+  'Olá! Quero começar o trial de 14 dias do FisioDesk e depois seguir no Plano Pro (R$59,90/mês). Como funciona?'
 )
 
 const features = [
@@ -84,7 +84,7 @@ const faqs = [
   {
     question: 'Como funciona o pagamento?',
     answer:
-      'O pagamento é feito via PIX diretamente para nossa chave. Após a confirmação, ativamos seu acesso em até 1 hora durante o horário comercial.'
+      'Voce comeca com 14 dias gratis. Ao final do trial, se quiser continuar, o pagamento e feito via PIX e sua assinatura segue no Plano Pro.'
   },
   {
     question: 'Preciso instalar algum programa?',
@@ -218,7 +218,7 @@ export function LandingPage() {
                   to="/register"
                   className="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-500 px-6 py-4 text-base font-semibold text-white hover:bg-green-600"
                 >
-                  Começar agora — R$59,90/mês
+                  Comecar gratis por 14 dias
                   <ArrowRight className="h-5 w-5" />
                 </Link>
                 <a
@@ -229,7 +229,8 @@ export function LandingPage() {
                 </a>
               </div>
               <div className="mt-6 flex flex-wrap gap-4 text-sm font-medium text-neutral-500">
-                <span>✓ Sem contrato</span>
+                <span>✓ 14 dias gratis</span>
+                <span>✓ Sem cartao</span>
                 <span>✓ Cancele quando quiser</span>
                 <span>✓ Suporte via WhatsApp</span>
               </div>
@@ -306,9 +307,9 @@ export function LandingPage() {
             </div>
             <div className="mt-12 grid gap-6 md:grid-cols-3">
               {[
-                ['📝', 'Crie sua conta', 'Cadastre-se gratuitamente em menos de 2 minutos. Preencha os dados da sua clínica e pronto.'],
-                ['✅', 'Ative seu plano', 'Entre em contato via WhatsApp para ativar seu acesso. Aceitamos PIX. Sem burocracia.'],
-                ['🚀', 'Gerencie sua clínica', 'Cadastre pacientes, organize a agenda e tenha controle total da sua operação.']
+                ['📝', 'Crie sua conta', 'Cadastre-se gratuitamente em menos de 2 minutos. Preencha os dados da sua clinica e pronto.'],
+                ['🎁', 'Use 14 dias gratis', 'Seu trial e liberado automaticamente para testar agenda, pacientes, prontuario e financeiro.'],
+                ['🚀', 'Continue se gostar', 'Ao final do trial, assine o Plano Pro para manter sua operacao liberada sem perder seus dados.']
               ].map(([emoji, title, description]) => (
                 <div key={title} className="rounded-3xl border border-white/10 bg-white/5 p-6">
                   <div className="text-4xl">{emoji}</div>
@@ -323,7 +324,7 @@ export function LandingPage() {
         <section id="precos" className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold text-neutral-950 md:text-4xl">Um plano simples, sem surpresas</h2>
-            <p className="mt-4 text-lg text-neutral-600">Tudo incluído por um valor acessível.</p>
+            <p className="mt-4 text-lg text-neutral-600">Teste 14 dias gratis e continue por um valor acessivel.</p>
           </div>
 
           <div className="mx-auto mt-12 max-w-2xl rounded-[32px] border-2 border-sky-200 bg-white p-8 shadow-xl">
@@ -368,12 +369,12 @@ export function LandingPage() {
               rel="noreferrer"
               className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-4 text-lg font-semibold text-white hover:bg-primary-dark"
             >
-              Assinar agora
+              Quero testar por 14 dias
               <ArrowRight className="h-5 w-5" />
             </a>
 
             <p className="mt-4 text-center text-sm text-neutral-500">
-              Sem contrato de fidelidade. Cancele quando quiser.
+              Sem contrato de fidelidade. Sem cartao. Cancele quando quiser.
             </p>
           </div>
 
@@ -420,7 +421,7 @@ export function LandingPage() {
           <div className="mx-auto flex max-w-5xl flex-col items-center px-4 text-center lg:px-8">
             <h2 className="text-3xl font-bold md:text-4xl">Pronto para organizar sua clínica?</h2>
             <p className="mt-4 max-w-2xl text-lg text-white/80">
-              Junte-se aos fisioterapeutas que já usam o FisioDesk para centralizar agenda, pacientes e financeiro.
+              Comece com 14 dias gratis e veja na pratica como centralizar agenda, pacientes e financeiro.
             </p>
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
               <Link

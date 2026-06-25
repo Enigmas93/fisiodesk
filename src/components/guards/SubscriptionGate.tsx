@@ -7,10 +7,10 @@ const PLAN_PRICE_LABEL = 'R$59,90/mês'
 
 const statusMessages = {
   pending: {
-    title: 'Aguardando ativação',
+    title: 'Assinatura pendente',
     description:
-      'Seu cadastro foi concluído. Fale com nossa equipe pelo WhatsApp para ativar o Plano Pro e liberar o acesso completo ao sistema.',
-    badge: 'Cadastro recebido'
+      'Sua assinatura ainda nao foi liberada. Fale com nossa equipe pelo WhatsApp para concluir a ativacao do Plano Pro.',
+    badge: 'Pendente'
   },
   suspended: {
     title: 'Assinatura suspensa',
@@ -31,24 +31,37 @@ const statusMessages = {
     badge: 'Renovação necessária'
   },
   trial: {
-    title: 'Período de teste ativo',
+    title: 'Periodo de teste ativo',
     description:
-      'Seu acesso está em trial. Caso precise de ajuda para ativação definitiva, fale conosco pelo WhatsApp.',
+      'Seu acesso esta em trial. Caso precise de ajuda para assinar definitivamente, fale conosco pelo WhatsApp.',
     badge: 'Trial ativo'
   },
   active: {
-    title: 'Acesso disponível',
-    description: 'Sua assinatura está ativa.',
+    title: 'Acesso disponivel',
+    description: 'Sua assinatura esta ativa.',
     badge: 'Assinatura ativa'
+  },
+  trial_expired: {
+    title: 'Seu trial expirou',
+    description:
+      'Os 14 dias gratuitos terminaram. Assine o Plano Pro para continuar usando agenda, prontuario e financeiro.',
+    badge: 'Trial encerrado'
   }
 } as const
 
 export function SubscriptionGate() {
   const { clinic, subscription, logout } = useAuthStore()
-  const status = subscription?.status ?? 'pending'
+  const isExpiredTrial =
+    subscription?.status === 'trial' &&
+    Boolean(subscription.current_period_end) &&
+    new Date(subscription.current_period_end as string).getTime() <= Date.now()
+  const status = isExpiredTrial ? 'trial_expired' : subscription?.status ?? 'pending'
   const statusInfo = statusMessages[status] ?? statusMessages.pending
-  const whatsappMessage = `Olá! Acabei de me cadastrar no ${appEnv.appName}.\n\n🏥 Clínica: ${clinic?.name ?? 'Minha Clínica'}\n📧 Email: ${clinic?.email ?? ''}\n📱 Telefone: ${subscription?.contact_whatsapp ?? clinic?.phone ?? ''}\n\nGostaria de ativar meu acesso ao Plano Pro (${PLAN_PRICE_LABEL}). Como posso realizar o pagamento?`
+  const whatsappMessage = `Olá! Usei o trial do ${appEnv.appName}.\n\n🏥 Clínica: ${clinic?.name ?? 'Minha Clínica'}\n📧 Email: ${clinic?.email ?? ''}\n📱 Telefone: ${subscription?.contact_whatsapp ?? clinic?.phone ?? ''}\n\nGostaria de continuar no Plano Pro (${PLAN_PRICE_LABEL}). Como posso realizar o pagamento?`
   const whatsappLink = getSupportWhatsappLink(whatsappMessage)
+  const periodEndLabel = subscription?.current_period_end
+    ? new Date(subscription.current_period_end).toLocaleDateString('pt-BR')
+    : null
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-blue-100 flex items-center justify-center p-4">
@@ -63,6 +76,11 @@ export function SubscriptionGate() {
           </span>
           <h1 className="mt-4 text-3xl font-bold text-neutral-900">{statusInfo.title}</h1>
           <p className="mt-3 text-neutral-500">{statusInfo.description}</p>
+          {periodEndLabel && (
+            <p className="mt-2 text-sm font-medium text-neutral-500">
+              {isExpiredTrial ? `Trial encerrado em ${periodEndLabel}.` : `Trial valido ate ${periodEndLabel}.`}
+            </p>
+          )}
         </div>
 
         <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-5">

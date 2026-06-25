@@ -39,10 +39,8 @@ function RouteFallback() {
 }
 
 function AuthenticatedRoute({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuthStore((state) => ({
-    isAuthenticated: state.isAuthenticated,
-    isLoading: state.isLoading
-  }))
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const isLoading = useAuthStore((state) => state.isLoading)
 
   if (isLoading) {
     return (
@@ -68,7 +66,8 @@ function ProtectedLayoutRoute() {
 }
 
 function App() {
-  const { checkSession, isLoading } = useAuthStore()
+  const checkSession = useAuthStore((state) => state.checkSession)
+  const isLoading = useAuthStore((state) => state.isLoading)
 
   useEffect(() => {
     checkSession()

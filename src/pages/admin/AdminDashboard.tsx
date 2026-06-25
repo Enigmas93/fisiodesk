@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const { data: subscriptions, isLoading: loadingSubscriptions } = useAdminSubscriptions()
 
   const pending = subscriptions?.filter((item) => item.status === 'pending').slice(0, 5) ?? []
+  const trial = subscriptions?.filter((item) => item.status === 'trial').slice(0, 5) ?? []
   const expiringSoon =
     subscriptions?.filter((item) => {
       if (!item.current_period_end) return false
@@ -84,13 +85,23 @@ export default function AdminDashboard() {
 
         <div className="space-y-6">
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-900">Ações urgentes</h2>
-            <p className="mt-1 text-sm text-slate-500">Clientes aguardando ativação manual.</p>
+            <h2 className="text-xl font-semibold text-slate-900">Trials e pendencias</h2>
+            <p className="mt-1 text-sm text-slate-500">Clientes em trial ou com assinatura pendente que pedem acompanhamento.</p>
             <div className="mt-5 space-y-3">
-              {pending.length === 0 && <p className="text-sm text-slate-500">Nenhum cliente pendente no momento.</p>}
+              {pending.length === 0 && trial.length === 0 && (
+                <p className="text-sm text-slate-500">Nenhum cliente exigindo acompanhamento no momento.</p>
+              )}
+              {trial.map((item) => (
+                <div key={item.id} className="rounded-2xl bg-sky-50 p-4">
+                  <p className="font-semibold text-slate-900">{item.clinic?.name ?? 'Clinica sem nome'}</p>
+                  <p className="text-sm text-slate-600">
+                    Trial ate {item.current_period_end ? new Date(item.current_period_end).toLocaleDateString('pt-BR') : '-'}
+                  </p>
+                </div>
+              ))}
               {pending.map((item) => (
                 <div key={item.id} className="rounded-2xl bg-amber-50 p-4">
-                  <p className="font-semibold text-slate-900">{item.clinic?.name ?? 'Clínica sem nome'}</p>
+                  <p className="font-semibold text-slate-900">{item.clinic?.name ?? 'Clinica sem nome'}</p>
                   <p className="text-sm text-slate-600">{item.clinic?.email ?? item.professional?.email ?? 'Sem email'}</p>
                 </div>
               ))}
