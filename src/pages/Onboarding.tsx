@@ -93,15 +93,16 @@ export function Onboarding() {
       return existingProfessional
     }
 
-    const { data: clinic, error: clinicError } = await (supabase.from('clinics') as any)
+    const clinicId = crypto.randomUUID()
+
+    const { error: clinicError } = await (supabase.from('clinics') as any)
       .insert({
+        id: clinicId,
         name: data.clinicName,
         phone: data.clinicPhone || null,
         address: data.clinicAddress || null,
         logo_url: data.clinicLogoUrl || null
       })
-      .select()
-      .single()
 
     if (clinicError) {
       throw clinicError
@@ -109,7 +110,7 @@ export function Onboarding() {
 
     const { data: professional, error: professionalError } = await (supabase.from('professionals') as any)
       .insert({
-        clinic_id: clinic.id,
+        clinic_id: clinicId,
         user_id: user.id,
         name: data.professionalName,
         email: user.email,
@@ -126,7 +127,7 @@ export function Onboarding() {
 
     if (data.createRoom && data.roomName) {
       const { error: roomError } = await (supabase.from('rooms') as any).insert({
-        clinic_id: clinic.id,
+        clinic_id: clinicId,
         name: data.roomName,
         description: data.roomDescription || null
       })
@@ -138,7 +139,7 @@ export function Onboarding() {
 
     if (data.createProcedure && data.procedureName) {
       const { error: procedureError } = await (supabase.from('procedures') as any).insert({
-        clinic_id: clinic.id,
+        clinic_id: clinicId,
         name: data.procedureName,
         duration_min: data.procedureDuration,
         price: data.procedurePrice
