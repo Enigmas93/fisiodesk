@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { CheckCircle2, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { supabase } from '../lib/supabase'
 import { initiateGoogleOAuth } from '../lib/google'
 import { useAuthStore } from '../stores/authStore'
 import { useTenantContext } from '../hooks/useTenantContext'
+import { ensureClinicBootstrap } from '../lib/bootstrap'
 
 type OnboardingData = {
   clinicName: string
@@ -79,86 +79,34 @@ export function Onboarding() {
       return tenantContext
     }
 
-    const { data: existingProfessional, error: existingProfessionalError } = await (supabase.from('professionals') as any)
-      .select('id, clinic_id, name, role')
-      .eq('user_id', user.id)
-      .maybeSingle()
-
-    if (existingProfessionalError) {
-      throw existingProfessionalError
-    }
-
-    if (existingProfessional?.clinic_id) {
-      await queryClient.invalidateQueries({ queryKey: ['tenant-context'] })
-      return existingProfessional
-    }
-
-    const clinicId = crypto.randomUUID()
-
-    const { error: clinicError } = await (supabase.from('clinics') as any)
-      .insert({
-        id: clinicId,
-        name: data.clinicName,
-        phone: data.clinicPhone || null,
-        address: data.clinicAddress || null,
-        logo_url: data.clinicLogoUrl || null
-      })
-
-    if (clinicError) {
-      throw clinicError
-    }
-
-    const professionalId = crypto.randomUUID()
-
-    const { error: professionalError } = await (supabase.from('professionals') as any)
-      .insert({
-        id: professionalId,
-        clinic_id: clinicId,
-        user_id: user.id,
-        name: data.professionalName,
-        email: user.email,
-        crefito: data.crefito || null,
-        specialty: data.specialty || null,
-        color: data.professionalColor
-      })
-
-    if (professionalError) {
-      throw professionalError
-    }
-
-    if (data.createRoom && data.roomName) {
-      const { error: roomError } = await (supabase.from('rooms') as any).insert({
-        clinic_id: clinicId,
-        name: data.roomName,
-        description: data.roomDescription || null
-      })
-
-      if (roomError) {
-        throw roomError
-      }
-    }
-
-    if (data.createProcedure && data.procedureName) {
-      const { error: procedureError } = await (supabase.from('procedures') as any).insert({
-        clinic_id: clinicId,
-        name: data.procedureName,
-        duration_min: data.procedureDuration,
-        price: data.procedurePrice
-      })
-
-      if (procedureError) {
-        throw procedureError
-      }
-    }
+    const bootstrap = await ensureClinicBootstrap({
+      user,
+      clinicName: data.clinicName,
+      clinicPhone: data.clinicPhone,
+      clinicAddress: data.clinicAddress,
+      clinicLogoUrl: data.clinicLogoUrl,
+      professionalName: data.professionalName,
+      crefito: data.crefito,
+      specialty: data.specialty,
+      professionalColor: data.professionalColor,
+      createRoom: data.createRoom,
+      roomName: data.roomName,
+      roomDescription: data.roomDescription,
+      createProcedure: data.createProcedure,
+      procedureName: data.procedureName,
+      procedureDuration: data.procedureDuration,
+      procedurePrice: data.procedurePrice
+    })
 
     await queryClient.invalidateQueries({ queryKey: ['tenant-context'] })
     await queryClient.invalidateQueries({ queryKey: ['professionals'] })
     await queryClient.invalidateQueries({ queryKey: ['rooms'] })
     await queryClient.invalidateQueries({ queryKey: ['procedures'] })
+    await queryClient.invalidateQueries({ queryKey: ['admin'] })
 
     return {
-      id: professionalId,
-      clinic_id: clinicId,
+      id: bootstrap.professionalId,
+      clinic_id: bootstrap.clinicId,
       name: data.professionalName,
       role: 'admin'
     }

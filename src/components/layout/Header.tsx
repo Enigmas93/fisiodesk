@@ -5,10 +5,13 @@ import {
   User,
   LogOut,
   Settings,
+  MessageCircle,
+  Shield
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '../../stores/authStore'
 import { toast } from 'sonner'
+import { getSupportWhatsappLink } from '../../lib/env'
 
 const breadcrumbNames: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -24,7 +27,7 @@ export function Header() {
   const location = useLocation()
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
-  const { user, logout } = useAuthStore()
+  const { user, logout, isSuperAdmin } = useAuthStore()
 
   const getCurrentPage = () => {
     for (const path in breadcrumbNames) {
@@ -56,6 +59,24 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-3">
+        <a
+          href={getSupportWhatsappLink()}
+          target="_blank"
+          rel="noreferrer"
+          className="hidden md:flex items-center gap-2 border border-neutral-200 hover:bg-neutral-100 text-neutral-700 px-4 py-2 rounded-md transition-colors"
+        >
+          <MessageCircle className="w-4 h-4" />
+          Suporte
+        </a>
+        {isSuperAdmin && (
+          <Link
+            to="/admin"
+            className="hidden md:flex items-center gap-2 border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2 rounded-md transition-colors"
+          >
+            <Shield className="w-4 h-4" />
+            Admin
+          </Link>
+        )}
         <Link
           to="/agenda/novo"
           className="hidden md:flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors"

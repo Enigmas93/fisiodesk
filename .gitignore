@@ -25,3 +25,7 @@ temp
 *.sln
 *.sw?
 
+
+.vercel
+.env*
+*.tsbuildinfo

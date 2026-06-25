@@ -17,7 +17,14 @@ export function Login() {
     try {
       await login(email, password)
       toast.success('Login realizado com sucesso!')
-      navigate('/dashboard')
+      const authState = useAuthStore.getState()
+      if (authState.isSuperAdmin) {
+        navigate('/admin')
+      } else if (!authState.hasTenant) {
+        navigate('/onboarding')
+      } else {
+        navigate('/dashboard')
+      }
     } catch (error: any) {
       toast.error(error.message || 'Erro ao fazer login')
     } finally {

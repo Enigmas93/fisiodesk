@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_GOOGLE_CLIENT_SECRET: string;
   readonly VITE_GOOGLE_REDIRECT_URI: string;
   readonly VITE_APP_URL: string;
+  readonly VITE_APP_NAME: string;
+  readonly VITE_SUPPORT_WHATSAPP: string;
 }
 
 interface ImportMeta {

@@ -2,15 +2,17 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, lazy, Suspense } from 'react'
 import type { ReactNode } from 'react'
 import { Layout } from './components/layout/Layout'
+import { AdminLayout } from './components/layout/AdminLayout'
 import { Login } from './pages/auth/Login'
 import { Register } from './pages/auth/Register'
 import { ForgotPassword } from './pages/auth/ForgotPassword'
 import { ResetPassword } from './pages/auth/ResetPassword'
 import { GoogleCallback } from './pages/auth/GoogleCallback'
 import { useAuthStore } from './stores/authStore'
-import { useTenantContext } from './hooks/useTenantContext'
 import { Loader2 } from 'lucide-react'
-import { Toaster } from 'sonner'
+import { AdminRoute } from './components/guards/AdminRoute'
+import { PrivateRoute } from './components/guards/PrivateRoute'
+import { PublicRoute } from './components/guards/PublicRoute'
 
 const Dashboard = lazy(() => import('./pages/Dashboard').then((module) => ({ default: module.Dashboard })))
 const Agenda = lazy(() => import('./pages/Agenda').then((module) => ({ default: module.Agenda })))
@@ -23,6 +25,10 @@ const Onboarding = lazy(() => import('./pages/Onboarding').then((module) => ({ d
 const PacienteDetail = lazy(() => import('./pages/PacienteDetail'))
 const PacienteForm = lazy(() => import('./pages/PacienteForm'))
 const AgendamentoForm = lazy(() => import('./pages/AgendamentoForm'))
+const LandingPage = lazy(() => import('./pages/public/LandingPage'))
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
+const AdminClientesPage = lazy(() => import('./pages/admin/AdminClientesPage'))
+const AdminLogsPage = lazy(() => import('./pages/admin/AdminLogsPage'))
 
 function RouteFallback() {
   return (
@@ -33,22 +39,10 @@ function RouteFallback() {
 }
 
 function AuthenticatedRoute({ children }: { children: ReactNode }) {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
-  }
-
-  return <>{children}</>
-}
-
-function ProtectedLayoutRoute() {
-  const { isAuthenticated } = useAuthStore()
-  const { data: tenantContext, isLoading } = useTenantContext({ required: false })
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
-  }
+  const { isAuthenticated, isLoading } = useAuthStore((state) => ({
+    isAuthenticated: state.isAuthenticated,
+    isLoading: state.isLoading
+  }))
 
   if (isLoading) {
     return (
@@ -58,15 +52,23 @@ function ProtectedLayoutRoute() {
     )
   }
 
-  if (!tenantContext) {
-    return <Navigate to="/onboarding" replace />
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
   }
 
-  return <Layout />
+  return <>{children}</>
+}
+
+function ProtectedLayoutRoute() {
+  return (
+    <PrivateRoute>
+      <Layout />
+    </PrivateRoute>
+  )
 }
 
 function App() {
-  const { checkSession, isAuthenticated, isLoading } = useAuthStore()
+  const { checkSession, isLoading } = useAuthStore()
 
   useEffect(() => {
     checkSession()
@@ -82,19 +84,39 @@ function App() {
 
   return (
     <>
-      <Toaster position="top-right" />
       <Routes>
         <Route
+          path="/"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <LandingPage />
+            </Suspense>
+          }
+        />
+        <Route path="/precos" element={<Navigate to="/#precos" replace />} />
+        <Route
           path="/login"
-          element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" replace />}
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
         />
         <Route
           path="/register"
-          element={!isAuthenticated ? <Register /> : <Navigate to="/onboarding" replace />}
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          }
         />
         <Route
           path="/forgot-password"
-          element={!isAuthenticated ? <ForgotPassword /> : <Navigate to="/dashboard" replace />}
+          element={
+            <PublicRoute>
+              <ForgotPassword />
+            </PublicRoute>
+          }
         />
         <Route
           path="/reset-password"
@@ -118,6 +140,39 @@ function App() {
             </AuthenticatedRoute>
           }
         />
+        <Route
+          path="/admin/*"
+          element={
+            <AdminRoute>
+              <AdminLayout />
+            </AdminRoute>
+          }
+        >
+          <Route
+            index
+            element={
+              <Suspense fallback={<RouteFallback />}>
+                <AdminDashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="clientes"
+            element={
+              <Suspense fallback={<RouteFallback />}>
+                <AdminClientesPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="logs"
+            element={
+              <Suspense fallback={<RouteFallback />}>
+                <AdminLogsPage />
+              </Suspense>
+            }
+          />
+        </Route>
         <Route
           path="/*"
           element={<ProtectedLayoutRoute />}

@@ -7,16 +7,18 @@ import {
   DollarSign,
   BarChart3,
   Settings,
-  HelpCircle,
   Menu,
   X,
   ChevronLeft,
   ChevronRight,
   LogOut,
+  Shield,
+  MessageCircle
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '../../stores/authStore'
 import { toast } from 'sonner'
+import { getSupportWhatsappLink } from '../../lib/env'
 
 interface SidebarProps {
   isMobileOpen: boolean
@@ -35,7 +37,7 @@ const navItems = [
 export function Sidebar({ isMobileOpen, onToggle }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const location = useLocation()
-  const { user, logout } = useAuthStore()
+  const { user, logout, isSuperAdmin } = useAuthStore()
 
   const handleLogout = async () => {
     try {
@@ -127,14 +129,30 @@ export function Sidebar({ isMobileOpen, onToggle }: SidebarProps) {
             {!isCollapsed && <span>Configurações</span>}
           </Link>
 
-          <Link
-            to="/ajuda"
-            onClick={onToggle}
+          {isSuperAdmin && (
+            <Link
+              to="/admin"
+              onClick={onToggle}
+              className={`flex items-center gap-3 px-3 py-3 rounded-md transition-colors ${
+                location.pathname.startsWith('/admin')
+                  ? 'bg-red-50 text-red-700 font-medium'
+                  : 'text-neutral-600 hover:bg-neutral-100'
+              }`}
+            >
+              <Shield className="w-5 h-5 flex-shrink-0" />
+              {!isCollapsed && <span>Admin SaaS</span>}
+            </Link>
+          )}
+
+          <a
+            href={getSupportWhatsappLink()}
+            target="_blank"
+            rel="noreferrer"
             className="flex items-center gap-3 px-3 py-3 rounded-md transition-colors text-neutral-600 hover:bg-neutral-100"
           >
-            <HelpCircle className="w-5 h-5 flex-shrink-0" />
-            {!isCollapsed && <span>Ajuda</span>}
-          </Link>
+            <MessageCircle className="w-5 h-5 flex-shrink-0" />
+            {!isCollapsed && <span>Suporte</span>}
+          </a>
         </nav>
 
         {/* User Section */}

@@ -6,7 +6,9 @@ export const appEnv = {
   googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
   googleClientSecret: import.meta.env.VITE_GOOGLE_CLIENT_SECRET || '',
   googleRedirectUri: import.meta.env.VITE_GOOGLE_REDIRECT_URI || `${window.location.origin}/auth/google/callback`,
-  appUrl: import.meta.env.VITE_APP_URL || window.location.origin
+  appUrl: import.meta.env.VITE_APP_URL || window.location.origin,
+  appName: import.meta.env.VITE_APP_NAME || 'FisioDesk',
+  supportWhatsapp: import.meta.env.VITE_SUPPORT_WHATSAPP || '5521972652314'
 }
 
 export type EnvChecklistItem = {
@@ -59,6 +61,20 @@ export const getEnvChecklist = (): EnvChecklistItem[] => [
     value: appEnv.appUrl,
     configured: isFilled(appEnv.appUrl),
     requiredFor: 'deploy'
+  },
+  {
+    key: 'VITE_APP_NAME',
+    label: 'App Name',
+    value: appEnv.appName,
+    configured: isFilled(appEnv.appName),
+    requiredFor: 'deploy'
+  },
+  {
+    key: 'VITE_SUPPORT_WHATSAPP',
+    label: 'Support WhatsApp',
+    value: appEnv.supportWhatsapp,
+    configured: isFilled(appEnv.supportWhatsapp),
+    requiredFor: 'deploy'
   }
 ]
 
@@ -72,6 +88,12 @@ export const getMissingEnvKeys = (scope: 'core' | 'google' | 'deploy' | 'all' = 
 export const isGoogleEnvConfigured = () => getMissingEnvKeys('google').length === 0
 export const isCoreEnvConfigured = () => getMissingEnvKeys('core').length === 0
 export const isDeployEnvConfigured = () => getMissingEnvKeys('deploy').length === 0
+
+export const getSupportWhatsappLink = (message?: string) => {
+  const base = `https://wa.me/${appEnv.supportWhatsapp}`
+  if (!message) return base
+  return `${base}?text=${encodeURIComponent(message)}`
+}
 
 export const assertGoogleEnvConfigured = () => {
   const missing = getMissingEnvKeys('google')
