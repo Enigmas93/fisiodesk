@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
+import { getCurrentTenantContext } from '../lib/tenant';
 import type { Patient, PatientInsert, PatientUpdate } from '../types';
 
 export const usePatients = () => {
@@ -39,8 +40,15 @@ export const useCreatePatient = () => {
   
   return useMutation({
     mutationFn: async (patient: PatientInsert) => {
+      const tenant = await getCurrentTenantContext();
+      const payload: PatientInsert = {
+        ...patient,
+        clinic_id: patient.clinic_id ?? tenant.clinicId,
+        owner_id: patient.owner_id ?? tenant.professionalId
+      };
+
       const { data, error } = await (supabase.from('patients') as any)
-        .insert(patient)
+        .insert(payload)
         .select()
         .single();
       

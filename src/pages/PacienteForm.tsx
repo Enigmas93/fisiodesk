@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { usePatient, useCreatePatient, useUpdatePatient } from '../hooks/usePatients'
 import { useProfessionals } from '../hooks/useLookupData'
+import { useTenantContext } from '../hooks/useTenantContext'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { PatientInsert, PatientUpdate } from '../types'
@@ -11,6 +12,7 @@ export default function PacienteForm() {
   const navigate = useNavigate()
   const { data: patient, isLoading: isLoadingPatient } = usePatient(id || '')
   const { data: professionals } = useProfessionals()
+  const { data: tenantContext, isLoading: isLoadingTenant } = useTenantContext()
   const createPatient = useCreatePatient()
   const updatePatient = useUpdatePatient()
   
@@ -77,6 +79,15 @@ export default function PacienteForm() {
     }
   }, [patient])
 
+  useEffect(() => {
+    if (!id && tenantContext?.professionalId && !formData.owner_id) {
+      setFormData((prev) => ({
+        ...prev,
+        owner_id: tenantContext.professionalId
+      }))
+    }
+  }, [tenantContext, id, formData.owner_id])
+
   const handleAddTag = () => {
     if (newTag.trim()) {
       setFormData(prev => ({ 
@@ -104,8 +115,7 @@ export default function PacienteForm() {
         toast.success('Paciente atualizado com sucesso!')
       } else {
         await createPatient.mutateAsync({
-          ...formData,
-          clinic_id: 'temp-clinic-id' // TODO: Replace with actual clinic_id from auth
+          ...formData
         } as PatientInsert)
         toast.success('Paciente criado com sucesso!')
       }
@@ -117,10 +127,21 @@ export default function PacienteForm() {
     }
   }
 
-  if (isLoadingPatient && id) {
+  if ((isLoadingPatient && id) || isLoadingTenant) {
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!tenantContext) {
+    return (
+      <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6">
+        <p className="text-red-600 font-medium">Nao foi possivel identificar a clinica do usuario logado.</p>
+        <p className="text-neutral-500 text-sm mt-2">
+          Vincule este usuario a um profissional da clinica no Supabase para cadastrar pacientes.
+        </p>
       </div>
     )
   }

@@ -1,27 +1,25 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuthStore } from '../../stores/authStore'
+import { Link } from 'react-router-dom'
 import { LayoutDashboard, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAuthStore } from '../../stores/authStore'
 
-export function Login() {
+export function ForgotPassword() {
+  const forgotPassword = useAuthStore((state) => state.forgotPassword)
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const login = useAuthStore((state) => state.login)
-  const navigate = useNavigate()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
+    setIsSubmitting(true)
+
     try {
-      await login(email, password)
-      toast.success('Login realizado com sucesso!')
-      navigate('/dashboard')
+      await forgotPassword(email)
+      toast.success('Enviamos o link de redefinição para seu email.')
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao fazer login')
+      toast.error(error.message || 'Não foi possível enviar o email de redefinição.')
     } finally {
-      setIsLoading(false)
+      setIsSubmitting(false)
     }
   }
 
@@ -38,13 +36,13 @@ export function Login() {
         </div>
 
         <h1 className="text-2xl font-bold text-center text-neutral-800 mb-2">
-          Bem-vindo de volta
+          Recuperar senha
         </h1>
         <p className="text-neutral-500 text-center mb-8">
-          Faça login na sua conta
+          Informe seu email para receber o link de redefinição
         </p>
 
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-2">
               Email
@@ -60,46 +58,26 @@ export function Login() {
             />
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-2">
-              Senha
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-              placeholder="••••••••"
-              required
-            />
-            <div className="mt-2 text-right">
-              <Link to="/forgot-password" className="text-sm text-primary font-medium hover:underline">
-                Esqueci minha senha
-              </Link>
-            </div>
-          </div>
-
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isSubmitting}
             className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 rounded-md transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {isLoading ? (
+            {isSubmitting ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Entrando...
+                Enviando...
               </>
             ) : (
-              'Entrar'
+              'Enviar link'
             )}
           </button>
         </form>
 
         <p className="text-center mt-6 text-neutral-600">
-          Não tem uma conta?{' '}
-          <Link to="/register" className="text-primary font-medium hover:underline">
-            Cadastre-se
+          Lembrou a senha?{' '}
+          <Link to="/login" className="text-primary font-medium hover:underline">
+            Voltar para login
           </Link>
         </p>
       </div>

@@ -1,16 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
+import { getCurrentTenantContext } from '../lib/tenant';
 import type {
   Appointment,
   AppointmentInsert,
   AppointmentUpdate,
   Patient,
-  Professional
+  Professional,
+  Room,
+  Procedure
 } from '../types';
 
 type AppointmentWithRelations = Appointment & {
   patient?: Patient;
   professional?: Professional;
+  room?: Room;
+  procedure?: Procedure;
 };
 
 export const useAppointments = () => {
@@ -22,7 +27,9 @@ export const useAppointments = () => {
         .select(`
           *,
           patient:patients(*),
-          professional:professionals(*)
+          professional:professionals(*),
+          room:rooms(*),
+          procedure:procedures(*)
         `)
         .order('date', { ascending: true })
         .order('start_time', { ascending: true });
@@ -61,8 +68,16 @@ export const useCreateAppointment = () => {
   
   return useMutation({
     mutationFn: async (appointment: AppointmentInsert) => {
+      const tenant = await getCurrentTenantContext();
+      const payload: AppointmentInsert = {
+        ...appointment,
+        clinic_id: appointment.clinic_id ?? tenant.clinicId,
+        professional_id: appointment.professional_id ?? tenant.professionalId,
+        created_by: appointment.created_by ?? tenant.userId
+      };
+
       const { data, error } = await (supabase.from('appointments') as any)
-        .insert(appointment)
+        .insert(payload)
         .select()
         .single();
       

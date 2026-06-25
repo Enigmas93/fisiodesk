@@ -12,30 +12,42 @@ export type ProfessionalUpdate = Database['public']['Tables']['professionals']['
 export type Clinic = Database['public']['Tables']['clinics']['Row'];
 export type ClinicInsert = Database['public']['Tables']['clinics']['Insert'];
 export type ClinicUpdate = Database['public']['Tables']['clinics']['Update'];
-
-export type Room = {
-  id: string;
-  clinic_id: string;
-  name: string;
-  description?: string | null;
-  capacity?: number | null;
-  color?: string | null;
-  is_active?: boolean | null;
-  created_at: string;
-};
-
-export type Procedure = {
-  id: string;
-  clinic_id: string;
-  name: string;
-  description?: string | null;
-  duration_min?: number | null;
-  price?: number | null;
-  category?: string | null;
-  color?: string | null;
-  is_active?: boolean | null;
-  created_at: string;
-};
+export type Room = Database['public']['Tables']['rooms']['Row'];
+export type RoomInsert = Database['public']['Tables']['rooms']['Insert'];
+export type RoomUpdate = Database['public']['Tables']['rooms']['Update'];
+export type Procedure = Database['public']['Tables']['procedures']['Row'];
+export type ProcedureInsert = Database['public']['Tables']['procedures']['Insert'];
+export type ProcedureUpdate = Database['public']['Tables']['procedures']['Update'];
+export type TreatmentPlan = Database['public']['Tables']['treatment_plans']['Row'];
+export type TreatmentPlanInsert = Database['public']['Tables']['treatment_plans']['Insert'];
+export type TreatmentPlanUpdate = Database['public']['Tables']['treatment_plans']['Update'];
+export type Package = Database['public']['Tables']['packages']['Row'];
+export type PackageInsert = Database['public']['Tables']['packages']['Insert'];
+export type PackageUpdate = Database['public']['Tables']['packages']['Update'];
+export type PackageSession = Database['public']['Tables']['package_sessions']['Row'];
+export type PackageSessionInsert = Database['public']['Tables']['package_sessions']['Insert'];
+export type PackageSessionUpdate = Database['public']['Tables']['package_sessions']['Update'];
+export type Assessment = Database['public']['Tables']['assessments']['Row'];
+export type AssessmentInsert = Database['public']['Tables']['assessments']['Insert'];
+export type AssessmentUpdate = Database['public']['Tables']['assessments']['Update'];
+export type Evolution = Database['public']['Tables']['evolutions']['Row'];
+export type EvolutionInsert = Database['public']['Tables']['evolutions']['Insert'];
+export type EvolutionUpdate = Database['public']['Tables']['evolutions']['Update'];
+export type AssessmentTemplate = Database['public']['Tables']['assessment_templates']['Row'];
+export type AssessmentTemplateInsert = Database['public']['Tables']['assessment_templates']['Insert'];
+export type AssessmentTemplateUpdate = Database['public']['Tables']['assessment_templates']['Update'];
+export type FinancialEntry = Database['public']['Tables']['financial_entries']['Row'];
+export type FinancialEntryInsert = Database['public']['Tables']['financial_entries']['Insert'];
+export type FinancialEntryUpdate = Database['public']['Tables']['financial_entries']['Update'];
+export type Reminder = Database['public']['Tables']['reminders']['Row'];
+export type ReminderInsert = Database['public']['Tables']['reminders']['Insert'];
+export type ReminderUpdate = Database['public']['Tables']['reminders']['Update'];
+export type AgendaConfig = Database['public']['Tables']['agenda_configs']['Row'];
+export type AgendaConfigInsert = Database['public']['Tables']['agenda_configs']['Insert'];
+export type AgendaConfigUpdate = Database['public']['Tables']['agenda_configs']['Update'];
+export type GoogleToken = Database['public']['Tables']['google_tokens']['Row'];
+export type GoogleTokenInsert = Database['public']['Tables']['google_tokens']['Insert'];
+export type GoogleTokenUpdate = Database['public']['Tables']['google_tokens']['Update'];
 
 export type User = {
   id: string;
