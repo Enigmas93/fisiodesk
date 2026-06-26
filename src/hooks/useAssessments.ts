@@ -68,6 +68,10 @@ export const useCreateAssessment = () => {
   
   return useMutation({
     mutationFn: async (assessment: AssessmentInsert) => {
+      if (!assessment.patient_id) {
+        throw new Error('Selecione um paciente antes de salvar a avaliação.')
+      }
+
       const tenant = await getCurrentTenantContext();
       const payload: AssessmentInsert = {
         ...assessment,

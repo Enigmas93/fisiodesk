@@ -3,17 +3,26 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAssessments, useCreateAssessment, useUpdateAssessment, useDeleteAssessment } from '../hooks/useAssessments';
 import { useEvolutions, useCreateEvolution, useUpdateEvolution, useDeleteEvolution } from '../hooks/useEvolutions';
+import { usePatients } from '../hooks/usePatients';
 import type { Assessment, Evolution } from '../types';
+
+const defaultAssessmentForm = (): Partial<Assessment> => ({
+  type: 'initial',
+  pain_level: 0
+});
+
+const defaultEvolutionForm = (): Partial<Evolution> => ({
+  date: new Date().toISOString().split('T')[0],
+  pain_level: 0
+});
 
 export function Prontuarios() {
   const [activeTab, setActiveTab] = useState<'avaliacoes' | 'evolucoes'>('avaliacoes');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<Assessment | Evolution | null>(null);
-  const [newItem, setNewItem] = useState<Partial<Assessment | Evolution>>({
-    type: 'initial',
-    pain_level: 0,
-  });
+  const [newItem, setNewItem] = useState<Partial<Assessment | Evolution>>(defaultAssessmentForm());
 
+  const { data: patients } = usePatients();
   const { data: assessments, isLoading: loadingAssessments } = useAssessments();
   const { data: evolutions, isLoading: loadingEvolutions } = useEvolutions();
   const createAssessment = useCreateAssessment();
@@ -23,8 +32,19 @@ export function Prontuarios() {
   const updateEvolution = useUpdateEvolution();
   const deleteEvolution = useDeleteEvolution();
 
+  const resetModalState = () => {
+    setShowAddModal(false);
+    setEditingItem(null);
+    setNewItem(activeTab === 'avaliacoes' ? defaultAssessmentForm() : defaultEvolutionForm());
+  };
+
   const handleSave = async () => {
     try {
+      if (!newItem.patient_id) {
+        toast.error('Selecione o paciente antes de salvar o prontuário.');
+        return;
+      }
+
       if (activeTab === 'avaliacoes') {
         if (editingItem) {
           await updateAssessment.mutateAsync({ id: editingItem.id, ...newItem } as any);
@@ -42,9 +62,7 @@ export function Prontuarios() {
           toast.success('Evolução adicionada!');
         }
       }
-      setShowAddModal(false);
-      setNewItem({ type: 'initial', pain_level: 0 });
-      setEditingItem(null);
+      resetModalState();
     } catch (error: any) {
       toast.error(error.message || 'Erro ao salvar');
     }
@@ -90,7 +108,11 @@ export function Prontuarios() {
           <h3 className="text-lg font-semibold text-neutral-800">Prontuários</h3>
         </div>
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={() => {
+            setEditingItem(null);
+            setNewItem(activeTab === 'avaliacoes' ? defaultAssessmentForm() : defaultEvolutionForm());
+            setShowAddModal(true);
+          }}
           className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -186,7 +208,7 @@ export function Prontuarios() {
               <h3 className="text-lg font-semibold text-neutral-800">
                 {editingItem ? (activeTab === 'avaliacoes' ? 'Editar Avaliação' : 'Editar Evolução') : (activeTab === 'avaliacoes' ? 'Nova Avaliação' : 'Nova Evolução')}
               </h3>
-              <button onClick={() => { setShowAddModal(false); setEditingItem(null); setNewItem({ type: 'initial', pain_level: 0 }); }}>
+              <button onClick={resetModalState}>
                 <svg className="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -195,6 +217,21 @@ export function Prontuarios() {
             <div className="space-y-4">
               {activeTab === 'avaliacoes' ? (
                 <>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Paciente</label>
+                    <select
+                      value={(newItem as Assessment | Evolution).patient_id || ''}
+                      onChange={(e) => setNewItem({ ...newItem, patient_id: e.target.value || undefined })}
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg"
+                    >
+                      <option value="">Selecione um paciente</option>
+                      {patients?.map((patient) => (
+                        <option key={patient.id} value={patient.id}>
+                          {patient.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-neutral-700 mb-2">Tipo</label>
                     <select
@@ -248,6 +285,21 @@ export function Prontuarios() {
                 </>
               ) : (
                 <>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Paciente</label>
+                    <select
+                      value={(newItem as Assessment | Evolution).patient_id || ''}
+                      onChange={(e) => setNewItem({ ...newItem, patient_id: e.target.value || undefined })}
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg"
+                    >
+                      <option value="">Selecione um paciente</option>
+                      {patients?.map((patient) => (
+                        <option key={patient.id} value={patient.id}>
+                          {patient.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-neutral-700 mb-2">Data</label>
                     <input
@@ -305,7 +357,7 @@ export function Prontuarios() {
                   Salvar
                 </button>
                 <button
-                  onClick={() => { setShowAddModal(false); setEditingItem(null); setNewItem({ type: 'initial', pain_level: 0 }); }}
+                  onClick={resetModalState}
                   className="flex-1 px-4 py-2 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors"
                 >
                   Cancelar

@@ -68,6 +68,10 @@ export const useCreateEvolution = () => {
   
   return useMutation({
     mutationFn: async (evolution: EvolutionInsert) => {
+      if (!evolution.patient_id) {
+        throw new Error('Selecione um paciente antes de salvar a evolução.')
+      }
+
       const tenant = await getCurrentTenantContext();
       const payload: EvolutionInsert = {
         ...evolution,
