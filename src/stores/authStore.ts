@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
+import { appEnv } from '../lib/env'
 import type { Clinic, Professional, User } from '../types'
 import type { Subscription, UserRole } from '../types/saas.types'
 
@@ -159,10 +160,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   register: async ({ email, password, name }) => {
     set({ isLoading: true })
 
+    const emailRedirectTo = `${appEnv.appUrl}/login`
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo,
         data: {
           name
         }
@@ -192,7 +196,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set(nextState)
   },
   forgotPassword: async (email) => {
-    const redirectTo = `${window.location.origin}/reset-password`
+    const redirectTo = `${appEnv.appUrl}/reset-password`
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
     if (error) throw error
   },

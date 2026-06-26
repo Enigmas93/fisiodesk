@@ -30,7 +30,15 @@ export function Login() {
         navigate('/dashboard')
       }
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao fazer login')
+      const message = String(error?.message || '')
+
+      if (message.toLowerCase().includes('email not confirmed')) {
+        toast.error('Seu e-mail ainda não foi confirmado. Abra sua caixa de entrada e confirme o cadastro antes de fazer login.')
+      } else if (message.toLowerCase().includes('invalid login credentials')) {
+        toast.error('E-mail ou senha inválidos.')
+      } else {
+        toast.error(error.message || 'Erro ao fazer login')
+      }
     } finally {
       setIsLoading(false)
     }
