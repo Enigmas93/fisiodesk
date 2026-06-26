@@ -6,25 +6,30 @@ import { useEvolutions, useCreateEvolution, useUpdateEvolution, useDeleteEvoluti
 import { usePatients } from '../hooks/usePatients';
 import type { Assessment, Evolution } from '../types';
 
-const defaultAssessmentForm = (): Partial<Assessment> => ({
+const defaultAssessmentForm = (patientId?: string): Partial<Assessment> => ({
   type: 'initial',
-  pain_level: 0
+  pain_level: 0,
+  patient_id: patientId
 });
 
-const defaultEvolutionForm = (): Partial<Evolution> => ({
+const defaultEvolutionForm = (patientId?: string): Partial<Evolution> => ({
   date: new Date().toISOString().split('T')[0],
-  pain_level: 0
+  pain_level: 0,
+  patient_id: patientId
 });
 
 export function Prontuarios() {
   const [activeTab, setActiveTab] = useState<'avaliacoes' | 'evolucoes'>('avaliacoes');
+  const [selectedPatientId, setSelectedPatientId] = useState<string>('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<Assessment | Evolution | null>(null);
   const [newItem, setNewItem] = useState<Partial<Assessment | Evolution>>(defaultAssessmentForm());
+  const filteredPatientId = selectedPatientId === 'all' ? undefined : selectedPatientId;
+  const isPatientLocked = Boolean(editingItem) || Boolean(filteredPatientId);
 
   const { data: patients } = usePatients();
-  const { data: assessments, isLoading: loadingAssessments } = useAssessments();
-  const { data: evolutions, isLoading: loadingEvolutions } = useEvolutions();
+  const { data: assessments, isLoading: loadingAssessments } = useAssessments(filteredPatientId);
+  const { data: evolutions, isLoading: loadingEvolutions } = useEvolutions(filteredPatientId);
   const createAssessment = useCreateAssessment();
   const updateAssessment = useUpdateAssessment();
   const deleteAssessment = useDeleteAssessment();
@@ -35,7 +40,7 @@ export function Prontuarios() {
   const resetModalState = () => {
     setShowAddModal(false);
     setEditingItem(null);
-    setNewItem(activeTab === 'avaliacoes' ? defaultAssessmentForm() : defaultEvolutionForm());
+    setNewItem(activeTab === 'avaliacoes' ? defaultAssessmentForm(filteredPatientId) : defaultEvolutionForm(filteredPatientId));
   };
 
   const handleSave = async () => {
@@ -103,21 +108,41 @@ export function Prontuarios() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-neutral-800">Prontuários</h3>
+          <p className="text-sm text-neutral-500">
+            Visualize todos os registros ou filtre por paciente para trabalhar com mais rapidez.
+          </p>
         </div>
-        <button
-          onClick={() => {
-            setEditingItem(null);
-            setNewItem(activeTab === 'avaliacoes' ? defaultAssessmentForm() : defaultEvolutionForm());
-            setShowAddModal(true);
-          }}
-          className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          {activeTab === 'avaliacoes' ? 'Nova Avaliação' : 'Nova Evolução'}
-        </button>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="min-w-[260px]">
+            <label className="mb-2 block text-sm font-medium text-neutral-700">Filtrar por paciente</label>
+            <select
+              value={selectedPatientId}
+              onChange={(event) => setSelectedPatientId(event.target.value)}
+              className="w-full rounded-lg border border-neutral-300 px-3 py-2"
+            >
+              <option value="all">Todos os pacientes</option>
+              {patients?.map((patient) => (
+                <option key={patient.id} value={patient.id}>
+                  {patient.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            onClick={() => {
+              setEditingItem(null);
+              setNewItem(activeTab === 'avaliacoes' ? defaultAssessmentForm(filteredPatientId) : defaultEvolutionForm(filteredPatientId));
+              setShowAddModal(true);
+            }}
+            className="flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-colors sm:self-end"
+          >
+            <Plus className="w-4 h-4" />
+            {activeTab === 'avaliacoes' ? 'Nova Avaliação' : 'Nova Evolução'}
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -223,6 +248,7 @@ export function Prontuarios() {
                       value={(newItem as Assessment | Evolution).patient_id || ''}
                       onChange={(e) => setNewItem({ ...newItem, patient_id: e.target.value || undefined })}
                       className="w-full px-3 py-2 border border-neutral-300 rounded-lg"
+                      disabled={isPatientLocked}
                     >
                       <option value="">Selecione um paciente</option>
                       {patients?.map((patient) => (
@@ -291,6 +317,7 @@ export function Prontuarios() {
                       value={(newItem as Assessment | Evolution).patient_id || ''}
                       onChange={(e) => setNewItem({ ...newItem, patient_id: e.target.value || undefined })}
                       className="w-full px-3 py-2 border border-neutral-300 rounded-lg"
+                      disabled={isPatientLocked}
                     >
                       <option value="">Selecione um paciente</option>
                       {patients?.map((patient) => (
