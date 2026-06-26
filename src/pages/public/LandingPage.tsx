@@ -129,10 +129,6 @@ export function LandingPage() {
 
   const supportLink = useMemo(() => getSupportWhatsappLink(), [])
 
-  // #region debug-point C:landing-render
-  fetch('http://127.0.0.1:7777/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: 'root-auto-login', runId: 'pre-fix', hypothesisId: 'C', location: 'src/pages/public/LandingPage.tsx:LandingPage', msg: '[DEBUG] LandingPage render', data: { href: window.location.href, pathname: window.location.pathname }, ts: Date.now() }) }).catch(() => {})
-  // #endregion
-
   return (
     <div className="min-h-screen bg-white text-neutral-900">
       <header className="sticky top-0 z-50 border-b border-white/50 bg-white/90 backdrop-blur-md">
@@ -391,7 +387,7 @@ export function LandingPage() {
               className="mt-4 inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-5 py-3 font-semibold text-green-700 hover:bg-green-100"
             >
               <MessageCircle className="h-4 w-4" />
-              WhatsApp {appEnv.supportWhatsapp}
+              WhatsApp Suporte
             </a>
           </div>
         </section>
@@ -461,7 +457,7 @@ export function LandingPage() {
                 <p className="text-sm text-neutral-500">Sistema de gestão para fisioterapeutas</p>
               </div>
             </div>
-            <p className="mt-4 text-sm text-neutral-500">Contato via WhatsApp: (21) 97265-2314</p>
+            <p className="mt-4 text-sm text-neutral-500">Suporte comercial e onboarding via WhatsApp.</p>
           </div>
 
           <div className="flex flex-wrap gap-6 text-sm font-medium text-neutral-600">

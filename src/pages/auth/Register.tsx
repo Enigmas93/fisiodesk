@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '../../stores/authStore'
-import { ensureClinicBootstrap } from '../../lib/bootstrap'
 
 export function Register() {
   const navigate = useNavigate()
@@ -11,8 +10,6 @@ export function Register() {
 
   const [formData, setFormData] = useState({
     name: '',
-    clinicName: '',
-    phone: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -41,24 +38,17 @@ export function Register() {
         password: formData.password
       })
 
-      const authUser = useAuthStore.getState().user
+      const authState = useAuthStore.getState()
 
-      if (!authUser) {
-        toast.success('Conta criada com sucesso! Faça login para continuar.')
+      if (!authState.isAuthenticated) {
+        toast.success('Conta criada com sucesso! Confirme seu email e faça login para iniciar o onboarding.')
         navigate('/login')
         return
       }
 
-      await ensureClinicBootstrap({
-        user: authUser,
-        clinicName: formData.clinicName,
-        clinicPhone: formData.phone,
-        professionalName: formData.name
-      })
-
-      await useAuthStore.getState().checkSession()
-      toast.success('Conta criada com sucesso! Seu teste gratuito de 14 dias ja esta liberado.')
-      navigate('/dashboard')
+      await authState.checkSession()
+      toast.success('Conta criada com sucesso! Agora conclua o onboarding da sua clínica.')
+      navigate('/onboarding')
     } catch (error: any) {
       toast.error(error.message || 'Não foi possível criar sua conta.')
     } finally {
@@ -82,7 +72,7 @@ export function Register() {
           Criar conta
         </h1>
         <p className="text-neutral-500 text-center mb-8">
-          Cadastre sua clinica e comece agora com 14 dias gratis no Plano Pro
+          Crie seu acesso e conclua o onboarding da sua clínica no primeiro login
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -97,36 +87,6 @@ export function Register() {
               onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
               className="w-full px-4 py-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
               placeholder="Nome do responsável"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="clinicName" className="block text-sm font-medium text-neutral-700 mb-2">
-              Nome da clínica
-            </label>
-            <input
-              id="clinicName"
-              type="text"
-              value={formData.clinicName}
-              onChange={(e) => setFormData((prev) => ({ ...prev, clinicName: e.target.value }))}
-              className="w-full px-4 py-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-              placeholder="Nome da sua clínica"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-neutral-700 mb-2">
-              WhatsApp
-            </label>
-            <input
-              id="phone"
-              type="text"
-              value={formData.phone}
-              onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
-              className="w-full px-4 py-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-              placeholder="(21) 99999-9999"
               required
             />
           </div>

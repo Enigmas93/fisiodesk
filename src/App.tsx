@@ -70,15 +70,8 @@ function App() {
   const isLoading = useAuthStore((state) => state.isLoading)
 
   useEffect(() => {
-    // #region debug-point B:check-session-effect
-    fetch('http://127.0.0.1:7777/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: 'root-auto-login', runId: 'pre-fix', hypothesisId: 'B', location: 'src/App.tsx:72', msg: '[DEBUG] App checkSession effect', data: { href: window.location.href, pathname: window.location.pathname }, ts: Date.now() }) }).catch(() => {})
-    // #endregion
     checkSession()
   }, [checkSession])
-
-  // #region debug-point B:app-render
-  fetch('http://127.0.0.1:7777/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: 'root-auto-login', runId: 'pre-fix', hypothesisId: 'B', location: 'src/App.tsx:App', msg: '[DEBUG] App render', data: { isLoading, href: window.location.href, pathname: window.location.pathname }, ts: Date.now() }) }).catch(() => {})
-  // #endregion
 
   if (isLoading) {
     return (

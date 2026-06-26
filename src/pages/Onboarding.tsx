@@ -32,6 +32,9 @@ export function Onboarding() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const user = useAuthStore((state) => state.user)
+  const professional = useAuthStore((state) => state.professional)
+  const clinic = useAuthStore((state) => state.clinic)
+  const hasTenant = useAuthStore((state) => state.hasTenant)
   const { data: tenantContext, isLoading: isLoadingTenant } = useTenantContext({ required: false })
 
   const [step, setStep] = useState(1)
@@ -55,11 +58,17 @@ export function Onboarding() {
     procedurePrice: 0
   })
 
+  const hasExistingSetup =
+    hasTenant ||
+    Boolean(tenantContext?.clinicId) ||
+    Boolean(professional?.clinic_id) ||
+    Boolean(clinic?.id)
+
   useEffect(() => {
-    if (tenantContext?.clinicId && !isConnectingGoogle) {
+    if (hasExistingSetup && !isConnectingGoogle) {
       navigate('/dashboard', { replace: true })
     }
-  }, [tenantContext, isConnectingGoogle, navigate])
+  }, [hasExistingSetup, isConnectingGoogle, navigate])
 
   const progress = useMemo(() => (step / TOTAL_STEPS) * 100, [step])
 
@@ -71,12 +80,21 @@ export function Onboarding() {
       throw new Error('Usuário não autenticado.')
     }
 
-    if (!data.clinicName || !data.professionalName) {
-      throw new Error('Preencha os dados obrigatórios para concluir o onboarding.')
+    if (hasExistingSetup) {
+      return tenantContext
+        ? tenantContext
+        : {
+            clinicId: professional?.clinic_id || clinic?.id || '',
+            professionalId: professional?.id || '',
+            professionalName: professional?.name || data.professionalName,
+            role: professional?.role || 'admin',
+            clinicName: clinic?.name || data.clinicName,
+            userId: user.id
+          }
     }
 
-    if (tenantContext?.clinicId) {
-      return tenantContext
+    if (!data.clinicName || !data.professionalName) {
+      throw new Error('Preencha os dados obrigatórios para concluir o onboarding.')
     }
 
     const bootstrap = await ensureClinicBootstrap({
@@ -118,7 +136,7 @@ export function Onboarding() {
       return
     }
 
-    if (!data.clinicName || !data.professionalName) {
+    if (!hasExistingSetup && (!data.clinicName || !data.professionalName)) {
       toast.error('Preencha os dados obrigatórios para concluir o onboarding.')
       return
     }
@@ -132,12 +150,13 @@ export function Onboarding() {
     } catch (error: any) {
       const message = String(error?.message || '')
 
-      if (
-        message.includes('row-level security policy') &&
-        message.includes('"clinics"')
-      ) {
+      if (message.includes('row-level security policy') && message.includes('"clinics"')) {
         toast.error(
           'O banco ainda não liberou a criação da clínica no onboarding. Aplique a migration 003_auth_bootstrap_policies.sql no Supabase e tente novamente.'
+        )
+      } else if (message.includes('row-level security policy') && message.includes('"professionals"')) {
+        toast.error(
+          'O banco ainda não liberou a criação do primeiro profissional. Aplique a migration 005_fix_professionals_bootstrap_policy.sql no Supabase e tente novamente.'
         )
       } else {
         toast.error(error.message || 'Não foi possível concluir o onboarding.')
@@ -156,12 +175,13 @@ export function Onboarding() {
     } catch (error: any) {
       const message = String(error?.message || '')
 
-      if (
-        message.includes('row-level security policy') &&
-        message.includes('"clinics"')
-      ) {
+      if (message.includes('row-level security policy') && message.includes('"clinics"')) {
         toast.error(
           'O banco ainda não liberou a criação da clínica no onboarding. Aplique a migration 003_auth_bootstrap_policies.sql no Supabase e tente novamente.'
+        )
+      } else if (message.includes('row-level security policy') && message.includes('"professionals"')) {
+        toast.error(
+          'O banco ainda não liberou a criação do primeiro profissional. Aplique a migration 005_fix_professionals_bootstrap_policy.sql no Supabase e tente novamente.'
         )
       } else {
         toast.error(error.message || 'Não foi possível preparar a integração com o Google.')

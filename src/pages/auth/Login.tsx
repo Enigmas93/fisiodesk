@@ -18,9 +18,13 @@ export function Login() {
       await login(email, password)
       toast.success('Login realizado com sucesso!')
       const authState = useAuthStore.getState()
+      const hasExistingSetup =
+        authState.hasTenant ||
+        Boolean(authState.professional?.clinic_id) ||
+        Boolean(authState.clinic?.id)
       if (authState.isSuperAdmin) {
         navigate('/admin')
-      } else if (!authState.hasTenant) {
+      } else if (!hasExistingSetup) {
         navigate('/onboarding')
       } else {
         navigate('/dashboard')
