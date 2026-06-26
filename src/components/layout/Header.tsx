@@ -12,6 +12,7 @@ import { useState } from 'react'
 import { useAuthStore } from '../../stores/authStore'
 import { toast } from 'sonner'
 import { getSupportWhatsappLink } from '../../lib/env'
+import { PwaInstallButton } from '../shared/PwaInstallButton'
 
 const breadcrumbNames: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -59,6 +60,7 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-3">
+        <PwaInstallButton className="hidden md:inline-flex" compact label="Instalar app" />
         <a
           href={getSupportWhatsappLink()}
           target="_blank"

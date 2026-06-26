@@ -71,21 +71,20 @@ Deno.serve(async (req) => {
         .from('professionals')
         .select('id, clinic_id, name, email, phone, role')
         .in('clinic_id', clinicIds)
-        .neq('role', 'super_admin')
 
       const professionalByClinic = new Map<string, Record<string, Json>>()
       for (const professional of professionals || []) {
-        if (!professionalByClinic.has(professional.clinic_id)) {
+        const current = professionalByClinic.get(professional.clinic_id)
+        const shouldReplace = !current || current.role === 'super_admin'
+        if (shouldReplace) {
           professionalByClinic.set(professional.clinic_id, professional as unknown as Record<string, Json>)
         }
       }
 
-      const result = (subscriptions || [])
-        .filter((item) => professionalByClinic.has(item.clinic_id))
-        .map((item) => ({
-          ...item,
-          professional: professionalByClinic.get(item.clinic_id) || null
-        }))
+      const result = (subscriptions || []).map((item) => ({
+        ...item,
+        professional: professionalByClinic.get(item.clinic_id) || null
+      }))
 
       return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

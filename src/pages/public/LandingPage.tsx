@@ -18,6 +18,7 @@ import {
   X
 } from 'lucide-react'
 import { appEnv, getSupportWhatsappLink } from '../../lib/env'
+import { PwaInstallButton } from '../../components/shared/PwaInstallButton'
 
 const WHATSAPP_PLAN_LINK = getSupportWhatsappLink(
   'Olá! Quero começar o trial de 14 dias do FisioDesk e depois seguir no Plano Pro (R$59,90/mês). Como funciona?'
@@ -152,6 +153,7 @@ export function LandingPage() {
           </nav>
 
           <div className="hidden items-center gap-3 lg:flex">
+            <PwaInstallButton compact label="Instalar app" />
             <Link to="/login" className="rounded-xl px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">
               Fazer login
             </Link>
@@ -227,6 +229,7 @@ export function LandingPage() {
                 >
                   Ver como funciona ↓
                 </a>
+                <PwaInstallButton label="Instalar no dispositivo" className="sm:min-w-[220px]" />
               </div>
               <div className="mt-6 flex flex-wrap gap-4 text-sm font-medium text-neutral-500">
                 <span>✓ 14 dias gratis</span>

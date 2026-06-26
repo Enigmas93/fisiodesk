@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 import { BarChart3, ClipboardList, LayoutDashboard, LogOut, ShieldAlert } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { appEnv, getSupportWhatsappLink } from '../../lib/env'
+import { PwaInstallButton } from '../shared/PwaInstallButton'
 
 const adminNav = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -33,6 +34,7 @@ export function AdminLayout() {
           </div>
 
           <div className="flex items-center gap-3">
+            <PwaInstallButton className="hidden md:inline-flex" compact label="Instalar app" />
             <a
               href={getSupportWhatsappLink()}
               target="_blank"
