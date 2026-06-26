@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
 import { LayoutDashboard, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -10,6 +10,8 @@ export function Login() {
   const [isLoading, setIsLoading] = useState(false)
   const login = useAuthStore((state) => state.login)
   const navigate = useNavigate()
+  const location = useLocation()
+  const confirmationEmail = (location.state as { confirmationEmail?: string } | null)?.confirmationEmail
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,7 +35,7 @@ export function Login() {
       const message = String(error?.message || '')
 
       if (message.toLowerCase().includes('email not confirmed')) {
-        toast.error('Seu e-mail ainda não foi confirmado. Abra sua caixa de entrada e confirme o cadastro antes de fazer login.')
+        toast.error('Seu e-mail ainda não foi confirmado. Abra sua caixa de entrada e confira também spam ou lixeira antes de fazer login.')
       } else if (message.toLowerCase().includes('invalid login credentials')) {
         toast.error('E-mail ou senha inválidos.')
       } else {
@@ -62,6 +64,12 @@ export function Login() {
         <p className="text-neutral-500 text-center mb-8">
           Faça login na sua conta
         </p>
+
+        {confirmationEmail && (
+          <div className="mb-6 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+            Confirmamos o envio do e-mail de cadastro para <strong>{confirmationEmail}</strong>. Antes de entrar, abra sua caixa de entrada e verifique tambem spam ou lixeira para concluir a confirmacao pela Supabase.
+          </div>
+        )}
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>

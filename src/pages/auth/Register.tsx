@@ -41,8 +41,13 @@ export function Register() {
       const authState = useAuthStore.getState()
 
       if (!authState.isAuthenticated) {
-        toast.success('Conta criada com sucesso! Confirme seu email e faça login para iniciar o onboarding.')
-        navigate('/login')
+        toast.success('Conta criada com sucesso! Confira seu e-mail, inclusive spam ou lixeira, para confirmar o cadastro antes de entrar.')
+        navigate('/login', {
+          replace: true,
+          state: {
+            confirmationEmail: formData.email
+          }
+        })
         return
       }
 

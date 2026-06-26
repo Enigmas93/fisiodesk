@@ -31,6 +31,7 @@ const TOTAL_STEPS = 4
 export function Onboarding() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const checkSession = useAuthStore((state) => state.checkSession)
   const user = useAuthStore((state) => state.user)
   const professional = useAuthStore((state) => state.professional)
   const clinic = useAuthStore((state) => state.clinic)
@@ -145,6 +146,7 @@ export function Onboarding() {
 
     try {
       await createInitialStructure()
+      await checkSession()
       toast.success('Onboarding concluído com sucesso!')
       navigate('/dashboard')
     } catch (error: any) {
@@ -171,6 +173,7 @@ export function Onboarding() {
 
     try {
       await createInitialStructure()
+      await checkSession()
       initiateGoogleOAuth()
     } catch (error: any) {
       const message = String(error?.message || '')

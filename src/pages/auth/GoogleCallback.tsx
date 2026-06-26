@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
 import { getCurrentTenantContext } from '../../lib/tenant'
 import { appEnv, assertGoogleEnvConfigured } from '../../lib/env'
+import { useAuthStore } from '../../stores/authStore'
 
 type GoogleTokenResponse = {
   access_token: string
@@ -17,6 +18,7 @@ type GoogleTokenResponse = {
 export function GoogleCallback() {
   const navigate = useNavigate()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const checkSession = useAuthStore((state) => state.checkSession)
 
   useEffect(() => {
     const handleGoogleCallback = async () => {
@@ -80,6 +82,7 @@ export function GoogleCallback() {
         }
 
         toast.success('Google conectado com sucesso!')
+        await checkSession()
         navigate('/configuracoes')
       } catch (callbackError: any) {
         setErrorMessage(callbackError.message || 'Não foi possível concluir a conexão com o Google.')
